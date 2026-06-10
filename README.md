@@ -147,7 +147,29 @@ notebooks/
 results/
   process_map.png, dag_refinement.png, figure_simulation.png
   base_cell_results.json, replications.csv   (M = 500 archived results)
+R/
+  closed_loop_sim.R       R port (base R + survival): whole pipeline in one file
+  run_study.R             run the study -> results_R/
+  test_closed_loop_sim.R  base-R test suite (12 checks)
+  tutorial.Rmd            R Markdown walkthrough
+  README.md               R-specific guide
 ```
+
+## Also in R
+
+A faithful **R port** for statisticians who work in R lives in [`R/`](R/). It depends only on
+base R and the **`survival`** package (cause-specific Cox) — the DGP and directly-follows
+graph are hand-coded, so no niche packages are needed. It reproduces the same headline result
+(Arm A accepts both artefacts, Arm B rejects both; latent Cox recovers β ≈ 0.25; mediated
+proportion ≈ 0.46).
+
+```bash
+cd R
+Rscript test_closed_loop_sim.R     # 12 tests
+Rscript run_study.R 100            # -> ../results_R/ (summary, csv, figures)
+```
+
+See [`R/README.md`](R/README.md) and [`R/tutorial.Rmd`](R/tutorial.Rmd).
 
 ## Reproducibility
 

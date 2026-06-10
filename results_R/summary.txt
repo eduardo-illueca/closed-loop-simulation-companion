@@ -1,0 +1,16 @@
+Ground-truth simulation (R) -- base cell, M=40, n=5000, R 4.5.1, survival 3.8.3
+
+STRUCTURAL RECOVERY (mean over M)
+arm     prec  recall     f1    shd   traps   anytrap   death
+A      0.714   0.833   0.77   3.00    2.00      100%    100%
+B      1.000   0.833   0.91   1.00    0.00        0%    100%
+C      1.000   1.000   1.00   0.00    0.00        0%    100%
+
+ESTIMAND RECOVERY (true S0S1=0.25, S1S2=0.00)
+target               mean     bias    rmse  coverage
+s0s1_latent         0.254   +0.004   0.082     0.93
+s0s1_naive          0.337   +0.087   0.119     0.80
+s0s1_adjusted       0.715   +0.465   0.480     0.00
+s1s2                0.185   +0.185   0.295     0.95
+
+MEDIATED PROPORTION (g-computation oracle, n=50000): 0.464 (indirect 0.0072 / total 0.0156)
