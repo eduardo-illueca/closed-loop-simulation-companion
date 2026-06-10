@@ -1,0 +1,8 @@
+numpy>=1.26
+scipy>=1.11
+pandas>=2.1
+pydantic>=2.5
+pm4py>=2.7
+lifelines>=0.28
+matplotlib>=3.7
+pytest>=8.0

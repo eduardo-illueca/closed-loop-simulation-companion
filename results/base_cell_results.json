@@ -1,0 +1,456 @@
+{
+  "meta": {
+    "python": "3.10.9",
+    "numpy": "2.2.6",
+    "pandas": "2.3.3",
+    "lifelines": "0.30.0",
+    "pm4py": "2.7.16.2",
+    "master_seed": 20260610,
+    "M": 500,
+    "n": 5000
+  },
+  "config": {
+    "seed": 20260610,
+    "n": 5000,
+    "dgp": {
+      "t_max": 10.0,
+      "covariates": {
+        "age_mean": 70.0,
+        "age_sd": 10.0,
+        "sex_female_prob": 0.5,
+        "diabetes_prob": 0.25,
+        "hypertension_prob": 0.55,
+        "egfr_mean": 75.0,
+        "egfr_sd": 15.0
+      },
+      "propensity": {
+        "alpha0": 0.8,
+        "alpha": [
+          0.4,
+          0.0,
+          0.5,
+          0.3,
+          -0.4
+        ]
+      },
+      "transitions": {
+        "S0->S1": {
+          "lam": 0.014,
+          "rho": 1.2,
+          "beta_E": 0.25,
+          "beta_L": [
+            0.3,
+            0.0,
+            0.35,
+            0.2,
+            -0.45
+          ]
+        },
+        "S0->S2": {
+          "lam": 0.0038,
+          "rho": 1.1,
+          "beta_E": 0.2,
+          "beta_L": [
+            0.35,
+            0.0,
+            0.3,
+            0.3,
+            -0.1
+          ]
+        },
+        "S0->S3": {
+          "lam": 0.0032,
+          "rho": 1.05,
+          "beta_E": 0.05,
+          "beta_L": [
+            0.55,
+            0.0,
+            0.2,
+            0.15,
+            -0.15
+          ]
+        },
+        "S1->S2": {
+          "lam": 0.0285,
+          "rho": 1.15,
+          "beta_E": 0.0,
+          "beta_L": [
+            0.25,
+            0.0,
+            0.3,
+            0.3,
+            -0.2
+          ]
+        },
+        "S1->S3": {
+          "lam": 0.0207,
+          "rho": 1.1,
+          "beta_E": 0.1,
+          "beta_L": [
+            0.5,
+            0.0,
+            0.25,
+            0.15,
+            -0.25
+          ]
+        },
+        "S2->S3": {
+          "lam": 0.1304,
+          "rho": 0.95,
+          "beta_E": 0.1,
+          "beta_L": [
+            0.4,
+            0.0,
+            0.2,
+            0.1,
+            -0.1
+          ]
+        }
+      }
+    },
+    "obs": {
+      "lambda_base": 1.0,
+      "kappa": 2.0,
+      "p_switch": 0.4,
+      "p_recode": 0.3
+    }
+  },
+  "cell": {
+    "M": 500,
+    "n": 5000,
+    "structural": {
+      "A": {
+        "precision_mean": 0.7142857142857142,
+        "precision_sd": 1.1102230246251565e-16,
+        "recall_mean": 0.8333333333333334,
+        "recall_sd": 0.0,
+        "f1_mean": 0.7692307692307693,
+        "f1_sd": 1.1102230246251565e-16,
+        "shd_mean": 3.0,
+        "shd_sd": 0.0,
+        "n_traps_accepted_mean": 2.0,
+        "n_traps_accepted_sd": 0.0,
+        "accept_any_trap_rate": 1.0,
+        "accept_any_trap_ci": [
+          0.9923753814690965,
+          0.9999999999999998
+        ],
+        "reject_S2_S0_rate": 0.0,
+        "reject_S2_S1_rate": 0.0,
+        "death_node_rate": 1.0
+      },
+      "B": {
+        "precision_mean": 1.0,
+        "precision_sd": 0.0,
+        "recall_mean": 0.8333333333333334,
+        "recall_sd": 0.0,
+        "f1_mean": 0.9090909090909087,
+        "f1_sd": 3.3306690738754696e-16,
+        "shd_mean": 1.0,
+        "shd_sd": 0.0,
+        "n_traps_accepted_mean": 0.0,
+        "n_traps_accepted_sd": 0.0,
+        "accept_any_trap_rate": 0.0,
+        "accept_any_trap_ci": [
+          0.0,
+          0.007624618530903363
+        ],
+        "reject_S2_S0_rate": 1.0,
+        "reject_S2_S1_rate": 1.0,
+        "death_node_rate": 1.0
+      },
+      "C": {
+        "precision_mean": 1.0,
+        "precision_sd": 0.0,
+        "recall_mean": 1.0,
+        "recall_sd": 0.0,
+        "f1_mean": 1.0,
+        "f1_sd": 0.0,
+        "shd_mean": 0.0,
+        "shd_sd": 0.0,
+        "n_traps_accepted_mean": 0.0,
+        "n_traps_accepted_sd": 0.0,
+        "accept_any_trap_rate": 0.0,
+        "accept_any_trap_ci": [
+          0.0,
+          0.007624618530903363
+        ],
+        "reject_S2_S0_rate": 1.0,
+        "reject_S2_S1_rate": 1.0,
+        "death_node_rate": 1.0
+      }
+    },
+    "estimation": {
+      "truth_S0S1": 0.25,
+      "truth_S1S2": 0.0,
+      "s0s1_latent": {
+        "mean_beta": 0.24959849019995614,
+        "sd": 0.06703936061948468,
+        "p2_5": 0.12307188619530833,
+        "p97_5": 0.38731624830083256,
+        "bias": -0.00040150980004385883,
+        "rmse": 0.06704056296294687,
+        "coverage": 0.964
+      },
+      "s0s1_naive": {
+        "mean_beta": 0.32692140750340576,
+        "sd": 0.07136784653178499,
+        "p2_5": 0.1910815665446011,
+        "p97_5": 0.47081159783966103,
+        "bias": 0.07692140750340576,
+        "rmse": 0.10492984537723012,
+        "coverage": 0.828
+      },
+      "s0s1_adjusted": {
+        "mean_beta": 0.6357960899853329,
+        "sd": 0.08260927153519816,
+        "p2_5": 0.4754245929597428,
+        "p97_5": 0.8016992167084777,
+        "bias": 0.3857960899853329,
+        "rmse": 0.3945413980706551,
+        "coverage": 0.006
+      },
+      "s1s2": {
+        "mean_beta": 0.18008315010346257,
+        "sd": 0.20521713369610567,
+        "p2_5": -0.20336275687810573,
+        "p97_5": 0.5955813890090897,
+        "bias": 0.18008315010346257,
+        "rmse": 0.2730274947942634,
+        "coverage": 0.906
+      }
+    }
+  },
+  "mediation_oracle": {
+    "mediated_proportion": 0.44730392156862747,
+    "total": 0.01632,
+    "direct": 0.00902,
+    "indirect": 0.007300000000000001,
+    "cif11": 0.10256,
+    "cif10": 0.09526,
+    "cif00": 0.08624
+  },
+  "observed_calibration": {
+    "rows": [
+      [
+        "S0->S1",
+        "PPI",
+        0.253,
+        0.281,
+        0.028
+      ],
+      [
+        "S0->S1",
+        "H2B",
+        0.198,
+        0.143,
+        0.055
+      ],
+      [
+        "S0->S2",
+        "PPI",
+        0.045,
+        0.047,
+        0.002
+      ],
+      [
+        "S0->S2",
+        "H2B",
+        0.036,
+        0.032,
+        0.004
+      ],
+      [
+        "S0->S3",
+        "PPI",
+        0.051,
+        0.048,
+        0.003
+      ],
+      [
+        "S0->S3",
+        "H2B",
+        0.027,
+        0.035,
+        0.008
+      ],
+      [
+        "S1->S2",
+        "PPI",
+        0.167,
+        0.181,
+        0.014
+      ],
+      [
+        "S1->S2",
+        "H2B",
+        0.149,
+        0.113,
+        0.036
+      ],
+      [
+        "S1->S3",
+        "PPI",
+        0.239,
+        0.266,
+        0.027
+      ],
+      [
+        "S1->S3",
+        "H2B",
+        0.179,
+        0.155,
+        0.024
+      ],
+      [
+        "S2->S3",
+        "PPI",
+        0.47,
+        0.487,
+        0.017
+      ],
+      [
+        "S2->S3",
+        "H2B",
+        0.379,
+        0.347,
+        0.032
+      ]
+    ],
+    "worst_gap": 0.055338195077484054,
+    "within_tol": true,
+    "observed": {
+      "PPI": {
+        "S0->S1": 0.28148755403189746,
+        "S0->S2": 0.04710090922641228,
+        "S0->S3": 0.04762259651214786,
+        "S1->S2": 0.18109610802223988,
+        "S1->S3": 0.26581943341276143,
+        "S2->S3": 0.4870820668693009,
+        "S2->S1": 0.24620060790273557
+      },
+      "H2B": {
+        "S0->S1": 0.14266180492251596,
+        "S0->S2": 0.031601336979641445,
+        "S0->S3": 0.03479185657854755,
+        "S1->S2": 0.11288604898828541,
+        "S1->S3": 0.1554845580404686,
+        "S2->S3": 0.3471337579617834,
+        "S2->S1": 0.24522292993630573
+      }
+    },
+    "coding_shift": {
+      "PPI": 0.24620060790273557,
+      "H2B": 0.24522292993630573
+    }
+  },
+  "latent_plausibility": {
+    "rates": {
+      "PPI": {
+        "S1->S2": 0.21224185120676786,
+        "S1->S3": 0.17118686240358297,
+        "S0->S2": 0.054031897451184974,
+        "S0->S3": 0.035921895960649874,
+        "S2->S3": 0.5114068441064639,
+        "S0->S1": 0.29952302876732745
+      },
+      "H2B": {
+        "S1->S2": 0.14299242424242425,
+        "S1->S3": 0.10606060606060606,
+        "S0->S2": 0.03767851716803403,
+        "S0->S3": 0.029018535399574597,
+        "S2->S3": 0.38847117794486213,
+        "S0->S1": 0.16043755697356427
+      }
+    },
+    "plausible": true
+  },
+  "representative_state_edges": {
+    "S0->S1": {
+      "risk": 0.229,
+      "count": 1146,
+      "median_time": 5.34,
+      "src": [
+        "CKD_recode",
+        "CKD_recorded"
+      ],
+      "attenuation": 0.19
+    },
+    "S1->S3": {
+      "risk": 0.219,
+      "count": 260,
+      "median_time": 2.03,
+      "src": [
+        "Death"
+      ],
+      "attenuation": -2.82
+    },
+    "S0->S3": {
+      "risk": 0.048,
+      "count": 241,
+      "median_time": 4.28,
+      "src": [
+        "Death"
+      ],
+      "attenuation": -4.34
+    },
+    "S0->S2": {
+      "risk": 0.039,
+      "count": 195,
+      "median_time": 4.32,
+      "src": [
+        "CVAE_recorded"
+      ],
+      "attenuation": -0.69
+    },
+    "S2->S0": {
+      "risk": 0.339,
+      "count": 124,
+      "median_time": 0.34,
+      "src": [
+        "MedicationChange"
+      ],
+      "attenuation": 0.15
+    },
+    "S2->S1": {
+      "risk": 0.18,
+      "count": 66,
+      "median_time": 0.24,
+      "src": [
+        "CKD_recode"
+      ],
+      "attenuation": -0.22
+    },
+    "S1->S2": {
+      "risk": 0.144,
+      "count": 171,
+      "median_time": 2.37,
+      "src": [
+        "CVAE_recorded"
+      ],
+      "attenuation": -0.03
+    },
+    "S2->S3": {
+      "risk": 0.257,
+      "count": 94,
+      "median_time": 1.29,
+      "src": [
+        "Death"
+      ],
+      "attenuation": -1.75
+    }
+  },
+  "representative_activity_dfg": {
+    "CKD_recode->Death": 48,
+    "CKD_recorded->CVAE_recorded": 171,
+    "CKD_recorded->Death": 212,
+    "CVAE_recorded->CKD_recode": 66,
+    "CVAE_recorded->Death": 94,
+    "CVAE_recorded->MedicationChange": 124,
+    "IndexDrug->CKD_recorded": 1133,
+    "IndexDrug->CVAE_recorded": 195,
+    "IndexDrug->Death": 201,
+    "MedicationChange->CKD_recode": 29,
+    "MedicationChange->Death": 40
+  }
+}
