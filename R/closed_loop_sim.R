@@ -25,7 +25,10 @@ base_cell <- function() {
                       egfr_mean = 75, egfr_sd = 15),
     # alpha0 sets ~69% PPI; alpha creates the confounding imbalance to be corrected.
     propensity = list(alpha0 = 0.8, alpha = c(0.4, 0.0, 0.5, 0.3, -0.4)),
-    obs = list(lambda_base = 1.0, kappa = 2.0, p_switch = 0.4, p_recode = 0.3),
+    # time_granularity: "exact" (deterministic) | "daily" | "monthly" | "yearly"
+    # (coarse rounds recorded timestamps and breaks ties randomly -- Table 5 sweep).
+    obs = list(lambda_base = 1.0, kappa = 2.0, p_switch = 0.4, p_recode = 0.3,
+               time_granularity = "exact"),
     transitions = list(
       "S0->S1" = tp(0.0140, 1.20, 0.25, c(0.30, 0, 0.35, 0.20, -0.45)),
       "S0->S2" = tp(0.0038, 1.10, 0.20, c(0.35, 0, 0.30, 0.30, -0.10)),
@@ -213,7 +216,15 @@ build_event_log <- function(n, cfg, seed) {
   }
   log <- data.frame(case = as.integer(cases), activity = acts, time = tms,
                     group = grps, stringsAsFactors = FALSE)
-  log <- log[order(log$case, log$time, ACTIVITY_ORDER[log$activity]), ]
+  gran <- if (is.null(cfg$obs$time_granularity)) "exact" else cfg$obs$time_granularity
+  step <- c(exact = NA, daily = 1 / 365.25, monthly = 1 / 12, yearly = 1)[[gran]]
+  if (is.na(step)) {
+    log <- log[order(log$case, log$time, ACTIVITY_ORDER[log$activity]), ]   # deterministic
+  } else {
+    log$time <- round(log$time / step) * step                              # coarse rounding
+    set.seed(seed + 12345L); log$.tb <- runif(nrow(log))                   # random tie-break
+    log <- log[order(log$case, log$time, log$.tb), ]; log$.tb <- NULL
+  }
   list(log = log, L = L, L_std = L_std, E = E, visit_counts = visit_counts, histories = histories)
 }
 

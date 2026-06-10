@@ -47,11 +47,19 @@ class DGPConfig(BaseModel):
     transitions: dict[str, TransitionParams]
 
 
+# Recorded-timestamp granularity: step in years (None = exact, no rounding).
+GRANULARITY_STEP = {"exact": None, "daily": 1.0 / 365.25, "monthly": 1.0 / 12.0, "yearly": 1.0}
+
+
 class ObservationConfig(BaseModel):
     lambda_base: float = Field(1.0, gt=0)   # H2B visits/year
     kappa: float = Field(2.0, ge=1)         # PPI monitoring multiplier
     p_switch: float = Field(0.4, ge=0, le=1)  # decoy: MedicationChange after CVAE
     p_recode: float = Field(0.3, ge=0, le=1)  # coding shift: CKD_recode after CVAE
+    # Recorded-timestamp granularity. "exact" keeps the reproducible deterministic
+    # ordering; coarser levels round timestamps and break same-bin ties RANDOMLY,
+    # modelling the analyst's loss of true temporal precedence (Table 5).
+    time_granularity: str = Field("exact", pattern="^(exact|daily|monthly|yearly)$")
 
 
 class SimConfig(BaseModel):

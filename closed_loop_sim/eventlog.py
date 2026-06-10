@@ -12,7 +12,7 @@ from dataclasses import dataclass
 import numpy as np
 import pandas as pd
 
-from closed_loop_sim.config import SimConfig
+from closed_loop_sim.config import GRANULARITY_STEP, SimConfig
 from closed_loop_sim.dgp import (
     assign_exposure, draw_covariates, simulate_trajectory, spawn_patient_seeds,
     standardize,
@@ -66,8 +66,18 @@ def build_event_log_data(n: int, cfg: SimConfig, seed: int) -> EventLogData:
             records.append({"case": i, "activity": activity, "time": float(t), "group": group})
 
     df = pd.DataFrame.from_records(records, columns=["case", "activity", "time", "group"])
-    df["_ord"] = df["activity"].map(ACTIVITY_ORDER).fillna(500)
-    df = df.sort_values(["case", "time", "_ord"]).drop(columns="_ord").reset_index(drop=True)
+    step = GRANULARITY_STEP[cfg.obs.time_granularity]
+    if step is None:
+        # Exact: deterministic, disease-order tie-break (reproducible base study).
+        df["_ord"] = df["activity"].map(ACTIVITY_ORDER).fillna(500)
+        df = df.sort_values(["case", "time", "_ord"]).drop(columns="_ord")
+    else:
+        # Coarse: round recorded timestamps; same-bin events have ambiguous order,
+        # modelled by a reproducible random tie-break (loss of temporal precedence).
+        df["time"] = np.round(df["time"] / step) * step
+        df["_tb"] = np.random.default_rng(seed ^ 0x9E3779B9).random(len(df))
+        df = df.sort_values(["case", "time", "_tb"]).drop(columns="_tb")
+    df = df.reset_index(drop=True)
     return EventLogData(log=df, L=L, L_std=L_std, E=E,
                         histories=histories, visit_counts=visit_counts)
 

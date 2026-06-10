@@ -101,7 +101,16 @@ python -m closed_loop_sim.finalize
 
 # Regenerate the process map + DAG-refinement figures
 python -m closed_loop_sim.visualize
+
+# Robustness sweeps (sample size, monitoring kappa, granularity, confounding, artefacts)
+python -m closed_loop_sim.sweeps    # -> results/sweeps.csv, sweeps.json, figure_sweeps.png
 ```
+
+The sweeps show the governed gate rejects both artefacts in **100% of replications across every
+condition**, while localising where the observation process bites: estimand precision improves
+with sample size, surveillance bias grows with monitoring κ, and coarse timestamps raise the
+ambiguous-transition rate. See [`docs/manuscript_sweeps_section.md`](docs/manuscript_sweeps_section.md)
+and `results/figure_sweeps.png`.
 
 A smaller, faster run for a first look:
 
