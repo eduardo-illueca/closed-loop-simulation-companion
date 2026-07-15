@@ -1,0 +1,65 @@
+@prefix : <https://w3id.org/closed-loop-sim/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+:EnhancedGraph a :Graph ;
+    rdfs:label "Enhanced Graph (Governed Causal Model)" ;
+    :hasEdge :edge_enhanced_S0_S1 , :edge_enhanced_S0_S2 , :edge_enhanced_S1_S2 , :edge_enhanced_S1_S3 , :edge_enhanced_S2_S3 ;
+    :hasDecision :decision_S1_S3 , :decision_S2_S0 , :decision_S2_S1 , :decision_S2_S3 .
+
+:S0 a :State ;
+    rdfs:label "Drug (index)" .
+
+:S1 a :State ;
+    rdfs:label "CKD" .
+
+:S2 a :State ;
+    rdfs:label "CVAE" .
+
+:S3 a :State ;
+    rdfs:label "Death (absorbing)" .
+
+:edge_enhanced_S0_S1 a :Edge ;
+    :source :S0 ;
+    :target :S1 .
+
+:edge_enhanced_S0_S2 a :Edge ;
+    :source :S0 ;
+    :target :S2 .
+
+:edge_enhanced_S1_S2 a :Edge ;
+    :source :S1 ;
+    :target :S2 .
+
+:edge_enhanced_S1_S3 a :Edge ;
+    :source :S1 ;
+    :target :S3 .
+
+:edge_enhanced_S2_S3 a :Edge ;
+    :source :S2 ;
+    :target :S3 .
+
+:decision_S1_S3 a :RefinementDecision ;
+    :proposedEdgeSource :S1 ;
+    :proposedEdgeTarget :S3 ;
+    :accepted true ;
+    :rationale "accepted: forward edge, plausible competing-risk/progression transition" .
+
+:decision_S2_S0 a :RefinementDecision ;
+    :proposedEdgeSource :S2 ;
+    :proposedEdgeTarget :S0 ;
+    :accepted false ;
+    :rationale "rejected: protected-direction violation (S2->S0 is backward)" .
+
+:decision_S2_S1 a :RefinementDecision ;
+    :proposedEdgeSource :S2 ;
+    :proposedEdgeTarget :S1 ;
+    :accepted false ;
+    :rationale "rejected: protected-direction violation (S2->S1 is backward)" .
+
+:decision_S2_S3 a :RefinementDecision ;
+    :proposedEdgeSource :S2 ;
+    :proposedEdgeTarget :S3 ;
+    :accepted true ;
+    :rationale "accepted: forward edge, plausible competing-risk/progression transition" .

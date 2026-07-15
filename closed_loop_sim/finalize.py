@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 ROOT = Path(__file__).resolve().parent.parent
-RES = json.loads((ROOT / "results" / "base_cell_results.json").read_text())
+RES = json.loads((ROOT / "results" / "base_cell_results.json").read_text(encoding="utf-8"))
 
 
 def pct(x):
@@ -68,11 +68,11 @@ def fill() -> dict:
 
 
 def render_doc(vals: dict) -> None:
-    src = (ROOT / "docs" / "manuscript_simulation_sections.md").read_text()
+    src = (ROOT / "docs" / "manuscript_simulation_sections.md").read_text(encoding="utf-8")
     for k, v in vals.items():
         src = src.replace("{{" + k + "}}", str(v))
     out = ROOT / "docs" / "manuscript_simulation_sections_FINAL.md"
-    out.write_text(src)
+    out.write_text(src, encoding="utf-8")
     leftover = [tok for tok in vals] and [s for s in src.split("{{")[1:]]
     print("wrote", out, "| unfilled placeholders:", len(src.split("{{")) - 1)
 

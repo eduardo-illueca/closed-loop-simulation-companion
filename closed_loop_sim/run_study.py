@@ -42,6 +42,12 @@ def main() -> None:
     print("[4/5] representative DFG (pm4py) ...", flush=True)
     data = build_event_log_data(cfg.n, cfg, seed=1)
     disc = discover(data.log, data.visit_counts, compute_activity_dfg=True)
+    
+    from closed_loop_sim.refinement import ARMS
+    from closed_loop_sim.rdf_export import export_graphs_to_rdf
+    refined_b = ARMS["B"](disc)
+    export_graphs_to_rdf(cfg, disc, refined_b, OUT)
+
     state_edges = {f"{a}->{b}": {"risk": round(e.risk, 3), "count": e.count,
                                  "median_time": round(e.median_time, 2),
                                  "src": sorted(e.source_activities),

@@ -1,0 +1,92 @@
+@prefix : <https://w3id.org/closed-loop-sim/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+:ProcessMapGraph a :Graph ;
+    rdfs:label "Discovered Process Map (Directly-Follows Graph)" ;
+    :hasEdge :edge_pm_S0_S1 , :edge_pm_S0_S2 , :edge_pm_S0_S3 , :edge_pm_S1_S2 , :edge_pm_S1_S3 , :edge_pm_S2_S0 , :edge_pm_S2_S1 , :edge_pm_S2_S3 .
+
+:S0 a :State ;
+    rdfs:label "Drug (index)" .
+
+:S1 a :State ;
+    rdfs:label "CKD" .
+
+:S2 a :State ;
+    rdfs:label "CVAE" .
+
+:S3 a :State ;
+    rdfs:label "Death (absorbing)" .
+
+:edge_pm_S0_S1 a :Edge ;
+    :source :S0 ;
+    :target :S1 ;
+    :risk 0.2292 ;
+    :count 1146 ;
+    :medianTime 5.341566982430218 ;
+    :monitoringAttenuation 0.19183451525930634 ;
+    :isTrap false .
+
+:edge_pm_S0_S2 a :Edge ;
+    :source :S0 ;
+    :target :S2 ;
+    :risk 0.039 ;
+    :count 195 ;
+    :medianTime 4.32328857863615 ;
+    :monitoringAttenuation -0.6938461883609277 ;
+    :isTrap false .
+
+:edge_pm_S0_S3 a :Edge ;
+    :source :S0 ;
+    :target :S3 ;
+    :risk 0.0482 ;
+    :count 241 ;
+    :medianTime 4.277677046835901 ;
+    :monitoringAttenuation -4.337997166830119 ;
+    :isTrap false .
+
+:edge_pm_S1_S2 a :Edge ;
+    :source :S1 ;
+    :target :S2 ;
+    :risk 0.14418212478920742 ;
+    :count 171 ;
+    :medianTime 2.370575883587412 ;
+    :monitoringAttenuation -0.033167362672662924 ;
+    :isTrap false .
+
+:edge_pm_S1_S3 a :Edge ;
+    :source :S1 ;
+    :target :S3 ;
+    :risk 0.21922428330522767 ;
+    :count 260 ;
+    :medianTime 2.0282421179906507 ;
+    :monitoringAttenuation -2.8150359449250635 ;
+    :isTrap false .
+
+:edge_pm_S2_S0 a :Edge ;
+    :source :S2 ;
+    :target :S0 ;
+    :risk 0.33879781420765026 ;
+    :count 124 ;
+    :medianTime 0.34047926514468474 ;
+    :monitoringAttenuation 0.15467980295566508 ;
+    :isTrap true .
+
+:edge_pm_S2_S1 a :Edge ;
+    :source :S2 ;
+    :target :S1 ;
+    :risk 0.18032786885245902 ;
+    :count 66 ;
+    :medianTime 0.2425938817218829 ;
+    :monitoringAttenuation -0.2182857142857142 ;
+    :isTrap true .
+
+:edge_pm_S2_S3 a :Edge ;
+    :source :S2 ;
+    :target :S3 ;
+    :risk 0.2568306010928962 ;
+    :count 94 ;
+    :medianTime 1.2946492933107705 ;
+    :monitoringAttenuation -1.748571428571429 ;
+    :isTrap false .

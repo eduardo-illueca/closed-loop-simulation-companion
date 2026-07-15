@@ -106,6 +106,9 @@ python -m closed_loop_sim.visualize
 python -m closed_loop_sim.sweeps    # -> results/sweeps.csv, sweeps.json, figure_sweeps.png
 ```
 
+*Note: Running `run_study` or `visualize` automatically exports the DGP, process map, and enhanced graph to RDF Turtle files (`results/dgp.ttl`, `results/process_map.ttl`, `results/enhanced_graph.ttl`).*
+
+
 The sweeps show the governed gate rejects both artefacts in **100% of replications across every
 condition**, while localising where the observation process bites: estimand precision improves
 with sample size, surveillance bias grows with monitoring κ, and coarse timestamps raise the
@@ -156,6 +159,7 @@ notebooks/
 results/
   process_map.png, dag_refinement.png, figure_simulation.png
   base_cell_results.json, replications.csv   (M = 500 archived results)
+  dgp.ttl, process_map.ttl, enhanced_graph.ttl   (RDF Turtle representations)
 R/
   closed_loop_sim.R       R port (base R + survival): whole pipeline in one file
   run_study.R             run the study -> results_R/

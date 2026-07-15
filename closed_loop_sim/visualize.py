@@ -127,6 +127,11 @@ def main():
     data = build_event_log_data(cfg.n, cfg, seed=1)
     disc = discover(data.log, data.visit_counts, compute_activity_dfg=False)
     process_map(disc)
+    
+    from closed_loop_sim.rdf_export import export_graphs_to_rdf
+    refined_b = ARMS["B"](disc)
+    export_graphs_to_rdf(cfg, disc, refined_b, ROOT / "results")
+
     refined = {arm: set(fn(disc).edges) for arm, fn in ARMS.items()}
     dag_refinement(refined)
     print("initial edges:", sorted(INITIAL_EDGES))

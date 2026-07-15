@@ -1,0 +1,62 @@
+@prefix : <https://w3id.org/closed-loop-sim/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+:DGPGraph a :Graph ;
+    rdfs:label "Data Generating Process (True DAG)" ;
+    :hasEdge :edge_dgp_S0_S1 , :edge_dgp_S0_S2 , :edge_dgp_S0_S3 , :edge_dgp_S1_S2 , :edge_dgp_S1_S3 , :edge_dgp_S2_S3 .
+
+:S0 a :State ;
+    rdfs:label "Drug (index)" .
+
+:S1 a :State ;
+    rdfs:label "CKD" .
+
+:S2 a :State ;
+    rdfs:label "CVAE" .
+
+:S3 a :State ;
+    rdfs:label "Death (absorbing)" .
+
+:edge_dgp_S0_S1 a :Edge ;
+    :source :S0 ;
+    :target :S1 ;
+    :beta_E 0.25 ;
+    :lambda 0.014 ;
+    :rho 1.2 .
+
+:edge_dgp_S0_S2 a :Edge ;
+    :source :S0 ;
+    :target :S2 ;
+    :beta_E 0.2 ;
+    :lambda 0.0038 ;
+    :rho 1.1 .
+
+:edge_dgp_S0_S3 a :Edge ;
+    :source :S0 ;
+    :target :S3 ;
+    :beta_E 0.05 ;
+    :lambda 0.0032 ;
+    :rho 1.05 .
+
+:edge_dgp_S1_S2 a :Edge ;
+    :source :S1 ;
+    :target :S2 ;
+    :beta_E 0.0 ;
+    :lambda 0.0285 ;
+    :rho 1.15 .
+
+:edge_dgp_S1_S3 a :Edge ;
+    :source :S1 ;
+    :target :S3 ;
+    :beta_E 0.1 ;
+    :lambda 0.0207 ;
+    :rho 1.1 .
+
+:edge_dgp_S2_S3 a :Edge ;
+    :source :S2 ;
+    :target :S3 ;
+    :beta_E 0.1 ;
+    :lambda 0.1304 ;
+    :rho 0.95 .
