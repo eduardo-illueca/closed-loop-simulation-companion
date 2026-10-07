@@ -77,15 +77,27 @@ def simulate_trajectory(L_std: np.ndarray, E, cfg: DGPConfig,
     e_func: Callable[[str], int] = E if callable(E) else (lambda _t: int(E))
     state, t = "S0", 0.0
     history: History = [("S0", 0.0)]
+    
+    # Challenge scenarios (Action A10): feedback transition S2->S1
+    allowed_transitions = dict(TRUE_TRANSITIONS)
+    if cfg.challenge_scenario == "feedback_cvae_ckd":
+        allowed_transitions["S2"] = ["S1", "S3"]
+        
     while state != "S3" and t < cfg.t_max:
-        outs = TRUE_TRANSITIONS[state]
+        outs = allowed_transitions.get(state, [])
         if not outs:
             break
         best_k, best_dt = None, np.inf
         for k in outs:
-            tp = cfg.transitions[f"{state}->{k}"]
+            tr_key = f"{state}->{k}"
+            if tr_key not in cfg.transitions:
+                # Default transition params for feedback S2->S1 if not specified
+                from closed_loop_sim.config import TransitionParams
+                tp = TransitionParams(lam=0.015, rho=1.1, beta_E=0.0)
+            else:
+                tp = cfg.transitions[tr_key]
             dt = sample_transition_time(tp.lam, tp.rho,
-                                        _linpred(tp, e_func(f"{state}->{k}"), L_std), rng)
+                                        _linpred(tp, e_func(tr_key), L_std), rng)
             if dt < best_dt:
                 best_k, best_dt = k, dt
         if t + best_dt > cfg.t_max:

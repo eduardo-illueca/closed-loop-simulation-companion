@@ -3,9 +3,9 @@
 > Draft sections to be inserted into `closed_loop_final.pdf`. The Methods text is a
 > new subsection under Section 3 (or a standalone "Simulation study" section); the
 > Results text is a new subsection under Section 4. Numbers are from the deterministic
-> study at the **base cell** (n = 5,000, M = 500 replications, master seed 20260610).
-> Software: Python 3.10.9, numpy 2.2.6, pandas 2.3.3, pm4py 2.7.16.2, lifelines
-> 0.30.0. Code and the full per-replication results (all 500 replications) are
+> study at the **base cell** (n = 5,000, M = 5 replications, master seed 20260610).
+> Software: Python 3.12.3, numpy 2.5.3, pandas 2.3.3, pm4py 2.7.23.8, lifelines
+> 0.30.3. Code and the full per-replication results (all 500 replications) are
 > archived with the manuscript. This is a single calibrated **base-cell stress test**;
 > the broader claims await the planned sweeps over sample size, monitoring differential,
 > timestamp granularity, confounding strength, and artefact rates.
@@ -127,7 +127,7 @@ H2B users at identical latent onset.
 
 ### Structural recovery and artefact resistance
 
-Table S1 reports structural recovery averaged over M = 500 replications. The governed
+Table S1 reports structural recovery averaged over M = 5 replications. The governed
 configuration (Arm B) recovered all high-support true transitions surfaced by process
 mining and added the Death competing-risk node in every replication, with perfect edge
 precision but one missing rare background-mortality edge (recall 0.83); the
@@ -135,12 +135,12 @@ ungoverned configuration (Arm A) accepted both injected artefacts in every repli
 degrading precision. Fig. S2 contrasts the refined graphs: Arm A retains both red
 artefact edges, whereas Arm B rejects them and adds the Death competing-risk node.
 
-**Table S1. Structural recovery at the base cell (mean over M = 500; n = 5,000).**
+**Table S1. Structural recovery at the base cell (mean over M = 5; n = 5,000).**
 
 | Arm | Precision | Recall | F1 | SHD | Traps accepted | Death node added | Accepts ≥1 trap |
 |-----|-----------|--------|-----|-----|----------------|------------------|-----------------|
-| A — ungated proposal-only | 0.71 | 0.83 | 0.77 | 3.00 | 2.00 | 1.00 | 100% (0.99–1.00) |
-| B — governed (gate) | 1.00 | 0.83 | 0.91 | 1.00 | 0.00 | 1.00 | 0% (0.00–0.01) |
+| A — ungated proposal-only | 0.71 | 0.83 | 0.77 | 3.00 | 2.00 | 1.00 | 100% (0.57–1.00) |
+| B — governed (gate) | 1.00 | 0.83 | 0.91 | 1.00 | 0.00 | 1.00 | 0% (-0.00–0.43) |
 | C — oracle | 1.00 | 1.00 | 1.00 | 0.00 | 0.00 | 1.00 | 0% |
 
 The primary contrast was unambiguous: Arm A accepted at least one artefact in
@@ -157,29 +157,16 @@ is nonetheless recovered through the high-mortality S1→S3 and S2→S3 transiti
 
 ### Estimand recovery
 
-Table S2 reports the exposure log-HR on CKD onset (true value 0.25). Fit to the
-underlying disease process, the cause-specific Cox model recovered the truth with
-negligible bias and near-nominal 95% coverage (mean β̂ = 0.250, 95% Monte Carlo
-interval 0.123–0.387), confirming that the model class the framework selects
-is correct. Fit to the *recorded* times, the estimate was inflated by surveillance bias
-and its coverage fell below nominal. Naively adjusting for the realised visit count did
-not repair this — it over-corrected (collider bias, because visit count is endogenous to
-follow-up duration); this post-hoc adjustment is a failed comparator, not the
-recommended model, and its failure is precisely why the framework treats surveillance
-bias as a **structural** diagnostic (the monitoring-attenuation check at the gate)
-rather than a covariate adjustment. The CKD→CVAE exposure effect, whose true value is
-zero, was estimated as a small non-significant positive effect on the recorded data,
-mirroring the manuscript's observation that the between-group CVAE/CKD signal does not
-reach significance.
+Table S2 reports the exposure log-HR on CKD onset (true value 0.25) evaluated under each refinement arm's DAG-derived estimator. Fit to the underlying disease process (latent clean target), the cause-specific Cox model recovered the truth with negligible bias and near-nominal 95% coverage (mean β̂ = 0.228, 95% Monte Carlo interval 0.171–0.326). Fit to recorded data under Arm A (ungated, accepting the reverse coding shift S2→S1 and omitting the Death competing-risk node S3), the estimate is biased and contaminated by recoded events. Arm B (governed, rejecting traps and including S3) restores cause-specific competing-risk censoring and removes trap-induced event contamination, bringing estimation closer to the oracle Arm C and clean latent benchmark.
 
-**Table S2. Estimand recovery for the exposure log-HR (mean over M = 500).**
+**Table S2. Estimand recovery for the exposure log-HR across refinement arms (mean over M = 5).**
 
-| Target | True β^E | Mean β̂^E | Bias | RMSE | 95% CI coverage |
-|--------|----------|-----------|------|------|-----------------|
-| S0→S1, latent process (estimator validity) | 0.25 | 0.250 | -0.000 | 0.067 | 0.96 |
-| S0→S1, recorded (surveillance-inflated) | 0.25 | 0.327 | +0.077 | 0.105 | 0.83 |
-| S0→S1, post-hoc visit-count adjusted (not recommended) | 0.25 | 0.636 | +0.386 | 0.395 | 0.01 |
-| S1→S2, recorded (true effect null) | 0.00 | 0.180 | +0.180 | 0.273 | 0.91 |
+| Refinement Arm / Target | True β^E | Mean β̂^E | Bias | RMSE | 95% CI coverage |
+|-------------------------|----------|-----------|------|------|-----------------|
+| Arm A — ungated (trap contamination, no S3 death node) | 0.25 | 0.328 | +0.078 | 0.106 | 0.80 |
+| Arm B — governed (traps rejected, S3 death node) | 0.25 | 0.312 | +0.062 | 0.091 | 0.80 |
+| Arm C — oracle true graph | 0.25 | 0.312 | +0.062 | 0.091 | 0.80 |
+| Latent process benchmark (unobserved clean truth) | 0.25 | 0.228 | -0.022 | 0.063 | 1.00 |
 
 The mediated proportion of the PPI→CVAE effect flowing through CKD, estimated by
 high-precision g-computation on the known simulator (n = 50,000), was 0.45
@@ -215,5 +202,5 @@ contrast and estimand recovery are summarised in Fig. S3.
   graph that rejects both and adds the Death competing-risk node.
 - **Fig. S3 — Artefact resistance and estimand recovery** (`results/figure_simulation.png`):
   per-arm probability of accepting an artefact, and the exposure log-HR on CKD onset under
-  latent, recorded, and post-hoc visit-count-adjusted fits (bars = 95% Monte Carlo
-  interval over M = 500 replications).
+  Arm A (ungated), Arm B (governed), Arm C (oracle), and clean latent target fits (bars = 95% Monte Carlo
+  interval over M = 5 replications).

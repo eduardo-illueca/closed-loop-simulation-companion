@@ -58,11 +58,19 @@ def main() -> None:
     per_rep = cell.pop("_per_rep")
     pd.DataFrame(per_rep).to_csv(OUT / "replications.csv", index=False)
 
-    import lifelines
-    import pm4py
+    try:
+        import lifelines
+        lifelines_ver = lifelines.__version__
+    except ImportError:
+        lifelines_ver = "not installed"
+    try:
+        import pm4py
+        pm4py_ver = pm4py.__version__
+    except ImportError:
+        pm4py_ver = "not installed"
     meta = {"python": platform.python_version(), "numpy": np.__version__,
-            "pandas": pd.__version__, "lifelines": lifelines.__version__,
-            "pm4py": pm4py.__version__, "master_seed": 20260610, "M": M, "n": cfg.n}
+            "pandas": pd.__version__, "lifelines": lifelines_ver,
+            "pm4py": pm4py_ver, "master_seed": 20260610, "M": M, "n": cfg.n}
 
     result = {"meta": meta, "config": cfg.model_dump(), "cell": cell,
               "mediation_oracle": med, "observed_calibration": obs_cal,

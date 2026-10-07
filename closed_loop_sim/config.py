@@ -45,6 +45,7 @@ class DGPConfig(BaseModel):
     covariates: CovariateConfig = Field(default_factory=CovariateConfig)
     propensity: PropensityConfig = Field(default_factory=PropensityConfig)
     transitions: dict[str, TransitionParams]
+    challenge_scenario: str | None = None  # Action A10: 'feedback_cvae_ckd', 'latent_common_cause', etc.
 
 
 # Recorded-timestamp granularity: step in years (None = exact, no rounding).
@@ -60,6 +61,9 @@ class ObservationConfig(BaseModel):
     # ordering; coarser levels round timestamps and break same-bin ties RANDOMLY,
     # modelling the analyst's loss of true temporal precedence (Table 5).
     time_granularity: str = Field("exact", pattern="^(exact|daily|monthly|yearly)$")
+    challenge_scenario: str | None = None  # Action A10: 'outcome_dependent_visits', 'held_out_artifact'
+    p_held_out: float = Field(0.0, ge=0, le=1)  # held-out artifact rate (Lab_Reassay)
+
 
 
 class SimConfig(BaseModel):

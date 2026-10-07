@@ -276,12 +276,13 @@ discover <- function(log, visit_counts) {
 # ---------------------------------------------------------------------------
 INITIAL_NODES <- c("S0", "S1", "S2")
 INITIAL_EDGES <- c("S0->S1", "S0->S2", "S1->S2")
+PHASE1_STATE_ORDER <- c(S0 = 0, S1 = 1, S2 = 2, S3 = 3)
 S_MIN <- 0.10
 
 none_gate <- function(cand) list(accept = cand$risk >= S_MIN, why = "ungoverned: support frequency")
 
-rules_gate <- function(cand) {
-  if (STATE_ORDER[cand$from] > STATE_ORDER[cand$to])
+rules_gate <- function(cand, state_order = PHASE1_STATE_ORDER) {
+  if (state_order[cand$from] > state_order[cand$to])
     return(list(accept = FALSE, why = "protected-direction (backward) violation"))
   if (length(intersect(cand$src, ADMIN_ACTIVITIES)) > 0)
     return(list(accept = FALSE, why = "administrative activity, not a causal edge"))
@@ -386,16 +387,73 @@ estimate <- function(data, t_max) {
        s1s2 = .fit_betaE(s12, COVARIATE_NAMES))
 }
 
+estimate_arm <- function(data, t_max, ref) {
+  n <- length(data$E)
+  ckd <- aggregate(time ~ case, data = data$log[data$log$activity == "CKD_recorded", ], FUN = min)
+  ckd_map <- setNames(ckd$time, ckd$case)
+  
+  include_recode <- is.null(ref) || ("S2->S1" %in% ref$edges)
+  if (include_recode && "CKD_recode" %in% data$log$activity) {
+    recode <- aggregate(time ~ case, data = data$log[data$log$activity == "CKD_recode", ], FUN = min)
+    recode_map <- setNames(recode$time, recode$case)
+    all_cases <- unique(c(names(ckd_map), names(recode_map)))
+    combined <- sapply(all_cases, function(cs) {
+      t1 <- ckd_map[cs]; t2 <- recode_map[cs]
+      if (is.na(t1)) t2 else if (is.na(t2)) t1 else min(t1, t2)
+    })
+    ckd_map <- setNames(combined, all_cases)
+  }
+  
+  has_death <- is.null(ref) || ("S3" %in% ref$nodes)
+  death_map <- if (has_death && "Death" %in% data$log$activity) {
+    d <- aggregate(time ~ case, data = data$log[data$log$activity == "Death", ], FUN = min)
+    setNames(d$time, d$case)
+  } else numeric(0)
+  
+  dur <- numeric(n); ev <- integer(n)
+  for (i in seq_len(n)) {
+    ct <- ckd_map[as.character(i)]
+    if (!is.null(ct) && !is.na(ct)) { dur[i] <- ct; ev[i] <- 1 }
+    else {
+      dt <- death_map[as.character(i)]
+      dur[i] <- if (!is.null(dt) && !is.na(dt)) dt else t_max
+      ev[i] <- 0
+    }
+  }
+  dur <- pmax(dur, 1e-6)
+  df <- data.frame(duration = dur, event = ev, E = data$E)
+  for (cn in COVARIATE_NAMES) df[[cn]] <- .zscore(data$L[, cn])
+  df$visits <- .zscore(data$visit_counts)
+  
+  res <- list(naive = .fit_betaE(df, COVARIATE_NAMES),
+              adjusted = .fit_betaE(df, c(COVARIATE_NAMES, "visits")))
+  res$beta <- res$naive$beta
+  res$lo <- res$naive$lo
+  res$hi <- res$naive$hi
+  res
+}
+
 # ---------------------------------------------------------------------------
 # 10. Experiment: run replications of a cell
 # ---------------------------------------------------------------------------
 run_replication <- function(cfg, seed, with_estimation = TRUE) {
   data <- build_event_log(cfg$n, cfg, seed)
   disc <- discover(data$log, data$visit_counts)
-  structural <- lapply(c("A","B","C"), function(a) structural_metrics(run_arm(a, disc)))
-  names(structural) <- c("A","B","C")
-  out <- list(seed = seed, structural = structural)
-  if (with_estimation) out$estimation <- estimate(data, cfg$t_max)
+  refinement <- list(
+    A = run_arm("A", disc),
+    B = run_arm("B", disc),
+    C = run_arm("C", disc)
+  )
+  structural <- lapply(refinement, structural_metrics)
+  out <- list(seed = seed, structural = structural, arm_estimation = list())
+  if (with_estimation) {
+    out$estimation <- estimate(data, cfg$t_max)
+    out$arm_estimation <- list(
+      A = estimate_arm(data, cfg$t_max, refinement$A),
+      B = estimate_arm(data, cfg$t_max, refinement$B),
+      C = estimate_arm(data, cfg$t_max, refinement$C)
+    )
+  }
   out
 }
 
@@ -416,7 +474,7 @@ run_cell <- function(cfg, M, master_seed = 20260610L, with_estimation = TRUE) {
   }
   if (with_estimation) {
     t01 <- true_beta_E(cfg, "S0->S1"); t12 <- true_beta_E(cfg, "S1->S2")
-    est <- list(truth_S0S1 = t01, truth_S1S2 = t12)
+    est <- list(truth_S0S1 = t01, truth_S1S2 = t12, by_arm = list())
     for (kt in list(c("s0s1_latent", t01), c("s0s1_naive", t01), c("s0s1_adjusted", t01), c("s1s2", t12))) {
       key <- kt[[1]]; truth <- as.numeric(kt[[2]])
       betas <- sapply(reps, function(r) r$estimation[[key]]$beta)
@@ -425,6 +483,28 @@ run_cell <- function(cfg, M, master_seed = 20260610L, with_estimation = TRUE) {
       est[[key]] <- list(mean_beta = mean(betas, na.rm = TRUE),
                          bias = mean(betas, na.rm = TRUE) - truth,
                          rmse = sqrt(mean((betas - truth)^2, na.rm = TRUE)), coverage = cover)
+    }
+    for (a in c("A","B","C")) {
+      betas <- sapply(reps, function(r) r$arm_estimation[[a]]$beta)
+      cover <- mean(mapply(function(r) {
+        e <- r$arm_estimation[[a]]; !is.na(e$lo) && e$lo <= t01 && t01 <= e$hi }, reps))
+      est$by_arm[[a]] <- list(
+        mean_beta = mean(betas, na.rm = TRUE),
+        bias = mean(betas, na.rm = TRUE) - t01,
+        rmse = sqrt(mean((betas - t01)^2, na.rm = TRUE)),
+        coverage = cover
+      )
+      for (mt in c("naive", "adjusted")) {
+        betas <- sapply(reps, function(r) r$arm_estimation[[a]][[mt]]$beta)
+        cover <- mean(mapply(function(r) {
+          e <- r$arm_estimation[[a]][[mt]]; !is.na(e$lo) && e$lo <= t01 && t01 <= e$hi }, reps))
+        est$by_arm[[a]][[mt]] <- list(
+          mean_beta = mean(betas, na.rm = TRUE),
+          bias = mean(betas, na.rm = TRUE) - t01,
+          rmse = sqrt(mean((betas - t01)^2, na.rm = TRUE)),
+          coverage = cover
+        )
+      }
     }
     agg$estimation <- est
   }

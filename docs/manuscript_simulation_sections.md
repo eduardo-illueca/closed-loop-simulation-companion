@@ -157,29 +157,16 @@ is nonetheless recovered through the high-mortality S1→S3 and S2→S3 transiti
 
 ### Estimand recovery
 
-Table S2 reports the exposure log-HR on CKD onset (true value 0.25). Fit to the
-underlying disease process, the cause-specific Cox model recovered the truth with
-negligible bias and near-nominal 95% coverage (mean β̂ = {{lat_mean}}, 95% Monte Carlo
-interval {{lat_p2}}–{{lat_p97}}), confirming that the model class the framework selects
-is correct. Fit to the *recorded* times, the estimate was inflated by surveillance bias
-and its coverage fell below nominal. Naively adjusting for the realised visit count did
-not repair this — it over-corrected (collider bias, because visit count is endogenous to
-follow-up duration); this post-hoc adjustment is a failed comparator, not the
-recommended model, and its failure is precisely why the framework treats surveillance
-bias as a **structural** diagnostic (the monitoring-attenuation check at the gate)
-rather than a covariate adjustment. The CKD→CVAE exposure effect, whose true value is
-zero, was estimated as a small non-significant positive effect on the recorded data,
-mirroring the manuscript's observation that the between-group CVAE/CKD signal does not
-reach significance.
+Table S2 reports the exposure log-HR on CKD onset (true value 0.25) evaluated under each refinement arm's DAG-derived estimator. Fit to the underlying disease process (latent clean target), the cause-specific Cox model recovered the truth with negligible bias and near-nominal 95% coverage (mean β̂ = {{lat_mean}}, 95% Monte Carlo interval {{lat_p2}}–{{lat_p97}}). Fit to recorded data under Arm A (ungated, accepting the reverse coding shift S2→S1 and omitting the Death competing-risk node S3), the estimate is biased and contaminated by recoded events. Arm B (governed, rejecting traps and including S3) restores cause-specific competing-risk censoring and removes trap-induced event contamination, bringing estimation closer to the oracle Arm C and clean latent benchmark.
 
-**Table S2. Estimand recovery for the exposure log-HR (mean over M = {{M}}).**
+**Table S2. Estimand recovery for the exposure log-HR across refinement arms (mean over M = {{M}}).**
 
-| Target | True β^E | Mean β̂^E | Bias | RMSE | 95% CI coverage |
-|--------|----------|-----------|------|------|-----------------|
-| S0→S1, latent process (estimator validity) | 0.25 | {{lat_mean}} | {{lat_bias}} | {{lat_rmse}} | {{lat_cov}} |
-| S0→S1, recorded (surveillance-inflated) | 0.25 | {{naive_mean}} | {{naive_bias}} | {{naive_rmse}} | {{naive_cov}} |
-| S0→S1, post-hoc visit-count adjusted (not recommended) | 0.25 | {{adj_mean}} | {{adj_bias}} | {{adj_rmse}} | {{adj_cov}} |
-| S1→S2, recorded (true effect null) | 0.00 | {{s12_mean}} | {{s12_bias}} | {{s12_rmse}} | {{s12_cov}} |
+| Refinement Arm / Target | True β^E | Mean β̂^E | Bias | RMSE | 95% CI coverage |
+|-------------------------|----------|-----------|------|------|-----------------|
+| Arm A — ungated (trap contamination, no S3 death node) | 0.25 | {{armA_mean}} | {{armA_bias}} | {{armA_rmse}} | {{armA_cov}} |
+| Arm B — governed (traps rejected, S3 death node) | 0.25 | {{armB_mean}} | {{armB_bias}} | {{armB_rmse}} | {{armB_cov}} |
+| Arm C — oracle true graph | 0.25 | {{armC_mean}} | {{armC_bias}} | {{armC_rmse}} | {{armC_cov}} |
+| Latent process benchmark (unobserved clean truth) | 0.25 | {{lat_mean}} | {{lat_bias}} | {{lat_rmse}} | {{lat_cov}} |
 
 The mediated proportion of the PPI→CVAE effect flowing through CKD, estimated by
 high-precision g-computation on the known simulator (n = 50,000), was {{med_prop}}
@@ -215,5 +202,5 @@ contrast and estimand recovery are summarised in Fig. S3.
   graph that rejects both and adds the Death competing-risk node.
 - **Fig. S3 — Artefact resistance and estimand recovery** (`results/figure_simulation.png`):
   per-arm probability of accepting an artefact, and the exposure log-HR on CKD onset under
-  latent, recorded, and post-hoc visit-count-adjusted fits (bars = 95% Monte Carlo
+  Arm A (ungated), Arm B (governed), Arm C (oracle), and clean latent target fits (bars = 95% Monte Carlo
   interval over M = {{M}} replications).

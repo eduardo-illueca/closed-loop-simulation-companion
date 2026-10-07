@@ -1,10 +1,10 @@
 {
   "meta": {
-    "python": "3.10.9",
-    "numpy": "2.2.6",
+    "python": "3.12.3",
+    "numpy": "1.26.4",
     "pandas": "2.3.3",
-    "lifelines": "0.30.0",
-    "pm4py": "2.7.16.2",
+    "lifelines": "not installed",
+    "pm4py": "2.7.14.4",
     "master_seed": 20260610,
     "M": 500,
     "n": 5000
@@ -106,13 +106,17 @@
             -0.1
           ]
         }
-      }
+      },
+      "challenge_scenario": null
     },
     "obs": {
       "lambda_base": 1.0,
       "kappa": 2.0,
       "p_switch": 0.4,
-      "p_recode": 0.3
+      "p_recode": 0.3,
+      "time_granularity": "exact",
+      "challenge_scenario": null,
+      "p_held_out": 0.0
     }
   },
   "cell": {
@@ -183,41 +187,112 @@
     "estimation": {
       "truth_S0S1": 0.25,
       "truth_S1S2": 0.0,
+      "by_arm": {
+        "A": {
+          "mean_beta": NaN,
+          "sd": NaN,
+          "p2_5": NaN,
+          "p97_5": NaN,
+          "bias": NaN,
+          "rmse": NaN,
+          "coverage": 0.0,
+          "naive": {
+            "mean_beta": NaN,
+            "sd": NaN,
+            "bias": NaN,
+            "rmse": NaN,
+            "coverage": 0.0
+          },
+          "adjusted": {
+            "mean_beta": NaN,
+            "sd": NaN,
+            "bias": NaN,
+            "rmse": NaN,
+            "coverage": 0.0
+          }
+        },
+        "B": {
+          "mean_beta": NaN,
+          "sd": NaN,
+          "p2_5": NaN,
+          "p97_5": NaN,
+          "bias": NaN,
+          "rmse": NaN,
+          "coverage": 0.0,
+          "naive": {
+            "mean_beta": NaN,
+            "sd": NaN,
+            "bias": NaN,
+            "rmse": NaN,
+            "coverage": 0.0
+          },
+          "adjusted": {
+            "mean_beta": NaN,
+            "sd": NaN,
+            "bias": NaN,
+            "rmse": NaN,
+            "coverage": 0.0
+          }
+        },
+        "C": {
+          "mean_beta": NaN,
+          "sd": NaN,
+          "p2_5": NaN,
+          "p97_5": NaN,
+          "bias": NaN,
+          "rmse": NaN,
+          "coverage": 0.0,
+          "naive": {
+            "mean_beta": NaN,
+            "sd": NaN,
+            "bias": NaN,
+            "rmse": NaN,
+            "coverage": 0.0
+          },
+          "adjusted": {
+            "mean_beta": NaN,
+            "sd": NaN,
+            "bias": NaN,
+            "rmse": NaN,
+            "coverage": 0.0
+          }
+        }
+      },
       "s0s1_latent": {
-        "mean_beta": 0.24959849019995614,
-        "sd": 0.06703936061948468,
-        "p2_5": 0.12307188619530833,
-        "p97_5": 0.38731624830083256,
-        "bias": -0.00040150980004385883,
-        "rmse": 0.06704056296294687,
-        "coverage": 0.964
+        "mean_beta": NaN,
+        "sd": NaN,
+        "p2_5": NaN,
+        "p97_5": NaN,
+        "bias": NaN,
+        "rmse": NaN,
+        "coverage": 0.0
       },
       "s0s1_naive": {
-        "mean_beta": 0.32692140750340576,
-        "sd": 0.07136784653178499,
-        "p2_5": 0.1910815665446011,
-        "p97_5": 0.47081159783966103,
-        "bias": 0.07692140750340576,
-        "rmse": 0.10492984537723012,
-        "coverage": 0.828
+        "mean_beta": NaN,
+        "sd": NaN,
+        "p2_5": NaN,
+        "p97_5": NaN,
+        "bias": NaN,
+        "rmse": NaN,
+        "coverage": 0.0
       },
       "s0s1_adjusted": {
-        "mean_beta": 0.6357960899853329,
-        "sd": 0.08260927153519816,
-        "p2_5": 0.4754245929597428,
-        "p97_5": 0.8016992167084777,
-        "bias": 0.3857960899853329,
-        "rmse": 0.3945413980706551,
-        "coverage": 0.006
+        "mean_beta": NaN,
+        "sd": NaN,
+        "p2_5": NaN,
+        "p97_5": NaN,
+        "bias": NaN,
+        "rmse": NaN,
+        "coverage": 0.0
       },
       "s1s2": {
-        "mean_beta": 0.18008315010346257,
-        "sd": 0.20521713369610567,
-        "p2_5": -0.20336275687810573,
-        "p97_5": 0.5955813890090897,
-        "bias": 0.18008315010346257,
-        "rmse": 0.2730274947942634,
-        "coverage": 0.906
+        "mean_beta": NaN,
+        "sd": NaN,
+        "p2_5": NaN,
+        "p97_5": NaN,
+        "bias": NaN,
+        "rmse": NaN,
+        "coverage": 0.0
       }
     }
   },
@@ -347,20 +422,20 @@
   "latent_plausibility": {
     "rates": {
       "PPI": {
-        "S1->S2": 0.21224185120676786,
-        "S1->S3": 0.17118686240358297,
-        "S0->S2": 0.054031897451184974,
-        "S0->S3": 0.035921895960649874,
         "S2->S3": 0.5114068441064639,
-        "S0->S1": 0.29952302876732745
+        "S1->S3": 0.17118686240358297,
+        "S0->S1": 0.29952302876732745,
+        "S1->S2": 0.21224185120676786,
+        "S0->S3": 0.035921895960649874,
+        "S0->S2": 0.054031897451184974
       },
       "H2B": {
-        "S1->S2": 0.14299242424242425,
-        "S1->S3": 0.10606060606060606,
-        "S0->S2": 0.03767851716803403,
-        "S0->S3": 0.029018535399574597,
         "S2->S3": 0.38847117794486213,
-        "S0->S1": 0.16043755697356427
+        "S1->S3": 0.10606060606060606,
+        "S0->S1": 0.16043755697356427,
+        "S1->S2": 0.14299242424242425,
+        "S0->S3": 0.029018535399574597,
+        "S0->S2": 0.03767851716803403
       }
     },
     "plausible": true

@@ -188,8 +188,114 @@ def render_figure(sw: dict) -> None:
     print("wrote", OUT / "figure_sweeps.png")
 
 
+def sweep_support_threshold(s_min_levels: list[float] = [0.01, 0.02, 0.05, 0.10, 0.15, 0.20],
+                            M: int = 20, seed: int = 20260610) -> pd.DataFrame:
+    """Action A12: Sensitivity analysis of the support threshold s_min."""
+    cfg = base_cell()
+    rows = []
+    for s_min in s_min_levels:
+        from closed_loop_sim import refinement
+        orig_smin = refinement.S_MIN
+        try:
+            refinement.S_MIN = s_min
+            res = _run_one(cfg, seed, with_est=False)
+            rows.append({
+                "sweep": "support_threshold",
+                "s_min": s_min,
+                "A_precision": res["A"]["precision"],
+                "A_recall": res["A"]["recall"],
+                "A_f1": res["A"]["f1"],
+                "B_precision": res["B"]["precision"],
+                "B_recall": res["B"]["recall"],
+                "B_f1": res["B"]["f1"],
+            })
+        finally:
+            refinement.S_MIN = orig_smin
+    return pd.DataFrame(rows)
+
+
+def sweep_replications_convergence(M_levels: list[int] = [50, 100, 200, 500, 1000, 2000],
+                                    master_seed: int = 20260610) -> pd.DataFrame:
+    """Action A24: Replication convergence and sensitivity run up to M=2000."""
+    cfg = base_cell()
+    rows = []
+    for M in M_levels:
+        from closed_loop_sim.experiment import run_cell
+        res = run_cell(cfg, M=M, master_seed=master_seed, with_estimation=False)
+        rows.append({
+            "M": M,
+            "A_accept_trap_rate": res["structural"]["A"]["accept_any_trap_rate"],
+            "B_accept_trap_rate": res["structural"]["B"]["accept_any_trap_rate"],
+            "B_precision_mean": res["structural"]["B"]["precision_mean"],
+            "B_recall_mean": res["structural"]["B"]["recall_mean"],
+        })
+    return pd.DataFrame(rows)
+
+
+def sweep_challenge_scenarios(M: int = 10, master_seed: int = 20260610) -> pd.DataFrame:
+    """Action A10: Challenge Scenarios sweep.
+    
+    Probes framework performance under:
+      1. 'baseline': Default cell (forward traps present).
+      2. 'feedback_cvae_ckd': True biological feedback S2->S1 present in DGP. Evaluates
+         the structural cost/penalty of wrongly rejecting true backward edges by a rigid gate.
+      3. 'held_out_artifact': Novel artifact class (Lab_Reassay) unknown to keyword rules gate.
+      4. 'high_artefact_rate': High rate of decoy and recode artifacts.
+    """
+    from closed_loop_sim.eventlog import build_event_log_data
+    from closed_loop_sim.discovery import discover
+    from closed_loop_sim.refinement import ARMS, cost_of_rejecting_true_backward_edges
+    from closed_loop_sim.metrics import structural_metrics
+
+    scenarios = [
+        ("baseline", lambda cfg: None),
+        ("feedback_cvae_ckd", lambda cfg: setattr(cfg.dgp, "challenge_scenario", "feedback_cvae_ckd")),
+        ("held_out_artifact", lambda cfg: (setattr(cfg.obs, "challenge_scenario", "held_out_artifact"), setattr(cfg.obs, "p_held_out", 0.4))),
+        ("high_artefact_rate", lambda cfg: (setattr(cfg.obs, "p_switch", 0.7), setattr(cfg.obs, "p_recode", 0.6))),
+    ]
+
+    rows = []
+    seeds = np.random.SeedSequence(master_seed).generate_state(M)
+    for sc_name, apply_fn in scenarios:
+        a_prec, b_prec, b_rec, b_fn_rate = [], [], [], []
+        for s in seeds:
+            cfg = base_cell()
+            apply_fn(cfg)
+            data = build_event_log_data(cfg.n, cfg, int(s))
+            disc = discover(data.log, data.visit_counts, compute_activity_dfg=False)
+            ref_a = ARMS["A"](disc)
+            ref_b = ARMS["B"](disc)
+            sm_a = structural_metrics(ref_a)
+            sm_b = structural_metrics(ref_b)
+
+            true_edges = (
+                {("S0", "S1"), ("S0", "S2"), ("S0", "S3"), ("S1", "S2"), ("S1", "S3"), ("S2", "S3"), ("S2", "S1")}
+                if sc_name == "feedback_cvae_ckd"
+                else {("S0", "S1"), ("S0", "S2"), ("S0", "S3"), ("S1", "S2"), ("S1", "S3"), ("S2", "S3")}
+            )
+            b_cost = cost_of_rejecting_true_backward_edges(ref_b, true_edges)
+
+            a_prec.append(sm_a["precision"])
+            b_prec.append(sm_b["precision"])
+            b_rec.append(sm_b["recall"])
+            b_fn_rate.append(b_cost["backward_edge_false_negative_rate"])
+
+        rows.append({
+            "sweep": "challenge_scenarios",
+            "scenario": sc_name,
+            "M": M,
+            "Arm_A_precision_mean": float(np.mean(a_prec)),
+            "Arm_B_precision_mean": float(np.mean(b_prec)),
+            "Arm_B_recall_mean": float(np.mean(b_rec)),
+            "Arm_B_backward_fn_rate": float(np.mean(b_fn_rate)),
+        })
+    return pd.DataFrame(rows)
+
+
 def main():
     sw = run_all()
+    sw["support_threshold"] = sweep_support_threshold()
+    sw["challenge_scenarios"] = sweep_challenge_scenarios()
     allrows = pd.concat(sw.values(), ignore_index=True)
     allrows.to_csv(OUT / "sweeps.csv", index=False)
     (OUT / "sweeps.json").write_text(json.dumps({k: v.to_dict("records") for k, v in sw.items()}, indent=2))
@@ -199,3 +305,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

@@ -1,0 +1,32 @@
+{
+  "action_item": "A33",
+  "n_trajectories": 500,
+  "n_event_log_rows": 761,
+  "seed": 42,
+  "framework_operating_mode": "Cycle-based diagnostic workflow (iterative batched analysis of longitudinal event logs), not real-time continuous stream processing.",
+  "timing_sec": {
+    "data_generation": 0.254,
+    "process_discovery": 0.103,
+    "refinement_cycles": 0.0,
+    "estimation": 0.752,
+    "total_runtime": 1.11
+  },
+  "memory": {
+    "peak_memory_mb": 0.67,
+    "peak_memory_gb": 0.0006
+  },
+  "refinement_metrics": {
+    "arm_b_cycles_run": 2,
+    "arm_b_stopped_reason": "stopping_rule: adjustment set stable and no new accepted refinements",
+    "arm_b_precision": 1.0,
+    "arm_b_recall": 0.8333333333333334,
+    "arm_b_f1": 0.9090909090909091
+  },
+  "hardware": {
+    "python_version": "3.12.3",
+    "platform": "Windows-10-10.0.19045-SP0",
+    "processor": "Intel64 Family 6 Model 141 Stepping 1, GenuineIntel",
+    "architecture": "64bit",
+    "cpu_count_logical": 16
+  }
+}

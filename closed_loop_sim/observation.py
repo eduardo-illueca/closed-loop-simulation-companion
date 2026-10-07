@@ -70,7 +70,11 @@ def inject_artifacts(events: Events, cfg: ObservationConfig, visits: list,
                      rng: np.random.Generator) -> Events:
     """Decoy (MedicationChange, S2->S0) and coding shift (CKD_recode, S2->S1),
     each at the next visit after a recorded CVAE. Visits are already truncated at
-    follow-up end, so artifacts cannot land after death."""
+    follow-up end, so artifacts cannot land after death.
+    
+    Action A10 Challenge Scenario: Supports held-out artifact class (Lab_Reassay)
+    unknown to standard keyword-matching gates.
+    """
     cvae_time = next((t for a, t in events if a == "CVAE_recorded"), None)
     if cvae_time is None:
         return events
@@ -81,4 +85,8 @@ def inject_artifacts(events: Events, cfg: ObservationConfig, visits: list,
             out.append(("MedicationChange", next_visit))
         if rng.random() < cfg.p_recode:
             out.append(("CKD_recode", next_visit))
+        if cfg.challenge_scenario == "held_out_artifact" or getattr(cfg, "p_held_out", 0.0) > 0:
+            if rng.random() < getattr(cfg, "p_held_out", 0.35):
+                out.append(("Lab_Reassay", next_visit))
     return _sort_events(out)
+

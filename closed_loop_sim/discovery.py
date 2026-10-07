@@ -20,8 +20,10 @@ ACTIVITY_TO_NODE = {
     "Death": "S3",
     "MedicationChange": "S0",   # decoy: medication change maps to the drug node
     "CKD_recode": "S1",          # coding shift maps to the CKD node
+    "Lab_Reassay": "S2",         # Action A10 held-out artifact class
 }
-ADMIN_ACTIVITIES = {"MedicationChange"}  # administrative, not biological transitions
+ADMIN_ACTIVITIES = {"MedicationChange", "Lab_Reassay"}  # administrative/lab, not biological transitions
+
 
 
 @dataclass
@@ -76,13 +78,14 @@ def discover(df: pd.DataFrame, visit_counts: np.ndarray,
         rows = list(zip(sub["activity"].tolist(), sub["time"].tolist()))
         nodes_seen = set()
         for act, _t in rows:
-            nodes_seen.add(ACTIVITY_TO_NODE[act])
+            nodes_seen.add(ACTIVITY_TO_NODE.get(act, "S0"))
         for nd in nodes_seen:
             origin_cases.setdefault(nd, set())  # ensure key exists
         for nd in nodes_seen:
             origin_cases[nd].add(case)
         for (a_act, a_t), (b_act, b_t) in zip(rows, rows[1:]):
-            a, b = ACTIVITY_TO_NODE[a_act], ACTIVITY_TO_NODE[b_act]
+            a, b = ACTIVITY_TO_NODE.get(a_act, "S0"), ACTIVITY_TO_NODE.get(b_act, "S0")
+
             if a == b:
                 continue
             edge = (a, b)
